@@ -34,6 +34,7 @@ setup(
     ],
     tests_require=[
         'httmock',
+        'Django>=1.5',
     ],
     license="BSD",
     zip_safe=False,
@@ -47,5 +48,5 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
     ],
-    test_suite='tests',
+    test_suite='runtests.runtests',
 )

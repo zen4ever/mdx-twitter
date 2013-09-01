@@ -48,3 +48,24 @@ Then just add 'twitter' to the list of your extensions:
 Twitter urls in your Makdown will become embedded tweets::
 
         https://twitter.com/jasoncosta/status/240192632003911681
+
+Django integration
+------------------
+
+Since Twitter has a rate limit on their APIs, and doing network calls all the
+time just to render Markdown is a bad idea anyways, we would need some caching.
+
+If you are using `mdx-twitter` in a Django project, it will automatically
+use your cache settings to cache HTML returned from Twitter API.
+
+Also, you could place your API credentials in TWITTER_SETTINGS variable in your
+project's `settings.py`, instead of using .cfg file
+
+    .. code-block:: python
+
+        TWITTER_SETTINGS = {
+            'CONSUMER_KEY': '',
+            'CONSUMER_SECRET': '',
+            'ACCESS_TOKEN': '',
+            'ACCESS_TOKEN_SECRET': '',
+        }
