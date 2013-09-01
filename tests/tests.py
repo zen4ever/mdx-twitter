@@ -10,21 +10,6 @@ from mdx_twitter.extension import TWITTER_LINK_RE, get_cache_key
 from httmock import urlmatch, HTTMock
 
 
-class TestDjangoInterations(TestCase):
-
-    def setUp(self):
-        pass
-
-    def test_django_caching(self):
-        md = markdown.Markdown(extensions=['twitter'], safe_mode=True)
-        key = get_cache_key('240192632003911681')
-        html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
-        self.assertEqual(cache.get(key), html)
-
-    def tearDown(self):
-        [cache.delete(key) for key in cache._cache.keys()]
-
-
 @urlmatch(netloc=r'(.*\.)?twitter\.com$')
 def twitter_mock(url, request):
     return """{
@@ -39,6 +24,22 @@ def twitter_mock(url, request):
       "cache_age": "31536000000",
       "author_url": "https://twitter.com/jasoncosta",
       "width": 550}"""
+
+
+class TestDjangoInterations(TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_django_caching(self):
+        md = markdown.Markdown(extensions=['twitter'], safe_mode=True)
+        key = get_cache_key('240192632003911681')
+        with HTTMock(twitter_mock):
+            html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
+            self.assertEqual(cache.get(key), html)
+
+    def tearDown(self):
+        cache.clear()
 
 
 class TestMdxTwitter(TestCase):
