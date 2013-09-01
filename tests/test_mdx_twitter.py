@@ -56,10 +56,10 @@ class TestMdxTwitter(unittest.TestCase):
     @unittest.skipUnless(
         os.path.exists(os.path.expanduser('~/.mdx_twitter.cfg')),
         "~/.mdx_twitter.cfg is absent"
-        )
+    )
     def test_live_oembed(self):
         import markdown
-        md = markdown.Markdown(extensions=['twitter'])
+        md = markdown.Markdown(extensions=['twitter'], safe_mode=True)
         html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
         self.assertEqual(html, u'<blockquote class="twitter-tweet"><p>Need to plug in for a couple of hours? Here&#39;s the mix: &quot;NERO - Essential Mix (First broadcast Nov 2010)&quot; - <a href="http://t.co/9MwHZCya">http://t.co/9MwHZCya</a></p>&mdash; Jason Costa (@jasoncosta) <a href="https://twitter.com/jasoncosta/statuses/240192632003911681">August 27, 2012</a></blockquote>\n<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>')  # NOQA
 

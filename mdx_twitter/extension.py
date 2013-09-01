@@ -28,7 +28,7 @@ class TwitterLinkPattern(Pattern):
     def handleMatch(self, m):
         tweet_id = m.group('tweet_id')
         html = self.get_html(tweet_id)
-        placeholder = self.markdown.htmlStash.store(html)
+        placeholder = self.markdown.htmlStash.store(html, safe=True)
         return placeholder
 
 
