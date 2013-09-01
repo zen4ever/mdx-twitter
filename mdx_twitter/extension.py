@@ -30,7 +30,7 @@ class TwitterLinkPattern(Pattern):
         if 'html' in result:
             html = result['html']
             if self.cache:
-                self.cache.set(get_cache_key(tweet_id), html)
+                self.cache.set(get_cache_key(tweet_id), html, timeout=60*60*24)
             return html
         else:
             for err in result['errors']:

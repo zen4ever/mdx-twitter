@@ -5,7 +5,7 @@ import logging
 
 __author__ = 'Andrii Kurinnyi'
 __email__ = 'andrew@marpasoft.com'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 def makeExtension(configs=None):
