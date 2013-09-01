@@ -34,6 +34,9 @@ setup(
         'Markdown',
         'requests-oauthlib>=0.3.3',
     ],
+    tests_require=[
+        'httmock',
+    ],
     license="BSD",
     zip_safe=False,
     keywords='mdx-twitter',
