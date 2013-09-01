@@ -7,6 +7,8 @@ import sys
 
 from setuptools import setup
 
+import mdx_twitter
+
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     sys.exit()
@@ -16,7 +18,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='mdx-twitter',
-    version='0.1.0',
+    version=mdx_twitter.__version__,
     description='Markdown extension for embedding tweets',
     long_description=readme + '\n\n' + history,
     author='Andrii Kurinnyi',
