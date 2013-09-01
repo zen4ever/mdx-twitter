@@ -5,10 +5,7 @@ import os
 import sys
 
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
@@ -28,7 +25,6 @@ setup(
     packages=[
         'mdx_twitter',
     ],
-    package_dir={'mdx_twitter': 'mdx_twitter'},
     include_package_data=True,
     install_requires=[
         'Markdown',
@@ -39,7 +35,7 @@ setup(
     ],
     license="BSD",
     zip_safe=False,
-    keywords='mdx-twitter',
+    keywords='Markdown, Twitter',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -48,8 +44,6 @@ setup(
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
     ],
     test_suite='tests',
 )
