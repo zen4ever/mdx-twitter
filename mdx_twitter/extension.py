@@ -1,3 +1,5 @@
+import logging
+
 from markdown import Extension
 from markdown.inlinepatterns import Pattern
 from requests_oauthlib import OAuth1Session
@@ -15,7 +17,13 @@ class TwitterLinkPattern(Pattern):
         response = self.client.get("https://api.twitter.com/1.1/statuses/oembed.json", params={
             'id': tweet_id,
         })
-        return response.json()['html']
+        result = response.json()
+        if 'html' in result:
+            return result['html']
+        else:
+            for err in result['errors']:
+                logging.warning(err['message'])
+        return "[Tweet oembed error]"
 
     def handleMatch(self, m):
         tweet_id = m.group('tweet_id')
@@ -29,7 +37,7 @@ class TwitterExtension(Extension):
         self.twitter_settings = kwargs.pop('twitter_settings')
         Extension.__init__(self, *args, **kwargs)
 
-    def get_client(self, twitter_settings=None):
+    def get_client(self):
         client = OAuth1Session(
             self.twitter_settings['CONSUMER_KEY'],
             client_secret=self.twitter_settings['CONSUMER_SECRET'],
