@@ -15,7 +15,6 @@ Markdown Twitter Extension
 Markdown extension for embedding tweets using twitter OEmbed API
 
 * Free software: BSD license
-* Documentation: http://mdx-twitter.rtfd.org.
 
 How to use
 ----------
@@ -69,3 +68,32 @@ project's `settings.py`, instead of using .cfg file
             'ACCESS_TOKEN': '',
             'ACCESS_TOKEN_SECRET': '',
         }
+
+Embedding tweets in UIWebView
+-----------------------------
+
+There are currently some problems with embedding tweets in UIWebView.
+
+* Protocol agnostic src attribute "//platform.twitter.com/widgets.js" doesn't
+  allow script to load
+
+* There seems to be a problem with automatically determining width of the
+  container
+
+  https://dev.twitter.com/discussions/15450
+
+So there is a 'width' configuration option that offers a quick 'fix' for those
+problems. Just specify expected width of your tweet in pixels. 
+
+    .. code-block:: python
+
+        import markdown
+
+        md = markdown.Markdown(extensions=['twitter(width=300)'])
+
+TODO
+----
+
+* If we embed multiple tweets, we don't need to have `script` tag after each
+  tweet. We should probably just have a `script` tag at the end of the
+  document.
