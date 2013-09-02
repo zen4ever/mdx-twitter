@@ -13,28 +13,38 @@ def get_cache_key(tweet_id):
 
 class TwitterLinkPattern(Pattern):
 
-    def __init__(self, pattern, markdown_instance=None, client=None, cache=None):
-        Pattern.__init__(self, pattern, markdown_instance)
-        self.client = client
-        self.cache = cache
-
     def get_html(self, tweet_id):
-        if self.cache:
-            html = self.cache.get(get_cache_key(tweet_id))
-            if html:
-                return html
-        response = self.client.get("https://api.twitter.com/1.1/statuses/oembed.json", params={
-            'id': tweet_id,
-        })
-        result = response.json()
-        if 'html' in result:
-            html = result['html']
-            if self.cache:
-                self.cache.set(get_cache_key(tweet_id), html, timeout=60*60*24)
+        html = None
+        if self.ext.cache:
+            html = self.ext.cache.get(get_cache_key(tweet_id))
+        if not html:
+            response = self.ext.client.get(
+                "https://api.twitter.com/1.1/statuses/oembed.json",
+                params={
+                    'id': tweet_id,
+                })
+            result = response.json()
+            if 'html' in result:
+                html = result['html']
+                if self.ext.cache:
+                    self.ext.cache.set(get_cache_key(tweet_id), html, timeout=60*60*24)
+            else:
+                for err in result['errors']:
+                    logging.warning(err['message'])
+        if html:
+            # if we have width in a config,
+            # we are probably use Markdow in a UIWebView
+            # https://dev.twitter.com/discussions/15450
+            if self.ext.config['width'][0]:
+                # let's fix the URL protocol
+                html = html.replace(
+                    '"//platform.twitter.com/',
+                    '"https://platform.twitter.com/'
+                )
+                html = "<div style='width: %spx'>%s</div>" % (
+                    self.ext.config['width'][0], html
+                )
             return html
-        else:
-            for err in result['errors']:
-                logging.warning(err['message'])
         return "[Tweet oembed error]"
 
     def handleMatch(self, m):
@@ -45,20 +55,27 @@ class TwitterLinkPattern(Pattern):
 
 
 class TwitterExtension(Extension):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, configs, **kwargs):
         self.twitter_settings = kwargs.pop('twitter_settings')
         self.cache = kwargs.pop('cache')
-        Extension.__init__(self, *args, **kwargs)
+        self.config = {
+            'width': ['', 'Width of your tweet, useful for mobile'],
+        }
+        for key, value in configs:
+            self.setConfig(key, value)
 
-    def get_client(self):
-        client = OAuth1Session(
-            self.twitter_settings['CONSUMER_KEY'],
-            client_secret=self.twitter_settings['CONSUMER_SECRET'],
-            resource_owner_key=self.twitter_settings['ACCESS_TOKEN'],
-            resource_owner_secret=self.twitter_settings['ACCESS_TOKEN_SECRET']
-        )
-        return client
+    @property
+    def client(self):
+        if not hasattr(self, '_client'):
+            self._client = OAuth1Session(
+                self.twitter_settings['CONSUMER_KEY'],
+                client_secret=self.twitter_settings['CONSUMER_SECRET'],
+                resource_owner_key=self.twitter_settings['ACCESS_TOKEN'],
+                resource_owner_secret=self.twitter_settings['ACCESS_TOKEN_SECRET']
+            )
+        return self._client
 
     def extendMarkdown(self, md, md_globals):
-        pattern = TwitterLinkPattern(TWITTER_LINK_RE, md, self.get_client(), cache=self.cache)
+        pattern = TwitterLinkPattern(TWITTER_LINK_RE, md)
+        pattern.ext = self
         md.inlinePatterns.add('twitter_link', pattern, '<reference')

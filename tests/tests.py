@@ -13,7 +13,7 @@ from httmock import urlmatch, HTTMock
 @urlmatch(netloc=r'(.*\.)?twitter\.com$')
 def twitter_mock(url, request):
     return """{
-        "html": "<blockquote class='twitter-tweet'><p>Need to plug in for a couple of hours? Here's the mix: 'NERO - Essential Mix (First broadcast Nov 2010)' - <a href='http://t.co/9MwHZCya' title='http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first'>soundcloud.com/nerouk/nero-es\\u2026</a></p>&mdash; Jason Costa (@jasoncosta) <a href='https://twitter.com/jasoncosta/status/240192632003911681' data-datetime='2012-08-27T21:02:40+00:00'>August 27, 2012</a></blockquote>\\n<script src='//platform.twitter.com/widgets.js' charset='utf-8'></script>",
+        "html": "<blockquote class='twitter-tweet'><p>Need to plug in for a couple of hours? Here's the mix: 'NERO - Essential Mix (First broadcast Nov 2010)' - <a href='http://t.co/9MwHZCya' title='http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first'>soundcloud.com/nerouk/nero-es\\u2026</a></p>&mdash; Jason Costa (@jasoncosta) <a href='https://twitter.com/jasoncosta/status/240192632003911681' data-datetime='2012-08-27T21:02:40+00:00'>August 27, 2012</a></blockquote>\\n<script src=\\"//platform.twitter.com/widgets.js\\" charset='utf-8'></script>",
       "author_name": "Jason Costa",
       "provider_url": "http://twitter.com",
       "url": "https://twitter.com/jasoncosta/status/240192632003911681",
@@ -28,9 +28,6 @@ def twitter_mock(url, request):
 
 class TestDjangoInterations(TestCase):
 
-    def setUp(self):
-        pass
-
     def test_django_caching(self):
         md = markdown.Markdown(extensions=['twitter'], safe_mode=True)
         key = get_cache_key('240192632003911681')
@@ -43,9 +40,6 @@ class TestDjangoInterations(TestCase):
 
 
 class TestMdxTwitter(TestCase):
-
-    def setUp(self):
-        pass
 
     def test_regex_1(self):
         m = re.match(TWITTER_LINK_RE, "https://twitter.com/jasoncosta/status/240192632003911681")
@@ -60,8 +54,15 @@ class TestMdxTwitter(TestCase):
 
         with HTTMock(twitter_mock):
             html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
-            result = u"<blockquote class='twitter-tweet'><p>Need to plug in for a couple of hours? Here's the mix: 'NERO - Essential Mix (First broadcast Nov 2010)' - <a href='http://t.co/9MwHZCya' title='http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first'>soundcloud.com/nerouk/nero-es\u2026</a></p>&mdash; Jason Costa (@jasoncosta) <a href='https://twitter.com/jasoncosta/status/240192632003911681' data-datetime='2012-08-27T21:02:40+00:00'>August 27, 2012</a></blockquote>\n<script src='//platform.twitter.com/widgets.js' charset='utf-8'></script>"  # NOQA
+            result = u"<blockquote class='twitter-tweet'><p>Need to plug in for a couple of hours? Here's the mix: 'NERO - Essential Mix (First broadcast Nov 2010)' - <a href='http://t.co/9MwHZCya' title='http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first'>soundcloud.com/nerouk/nero-es\u2026</a></p>&mdash; Jason Costa (@jasoncosta) <a href='https://twitter.com/jasoncosta/status/240192632003911681' data-datetime='2012-08-27T21:02:40+00:00'>August 27, 2012</a></blockquote>\n<script src=\"//platform.twitter.com/widgets.js\" charset='utf-8'></script>"  # NOQA
             self.assertEqual(html, result)
+
+    def test_width(self):
+        md = markdown.Markdown(extensions=['twitter(width=400)'])
+        with HTTMock(twitter_mock):
+            html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
+            self.assertNotEqual(html.find('400px'), -1)
+            self.assertNotEqual(html.find('https://platform.twitter.com/'), -1)
 
     if os.path.exists(os.path.expanduser('~/.mdx_twitter.cfg')):
         def test_live_oembed(self):
