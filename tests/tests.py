@@ -90,7 +90,7 @@ class TestMdxTwitter(TestCase):
         with HTTMock(twitter_mock):
             html = md.convert('http://twitter.com/jasoncosta/statuses/240192632003911681')
             self.assertEqual(html.find('<script'), -1)
-            self.assertEqual(html, u'<p><a href="https://twitter.com/jasoncosta/status/240192632003911681">Jason Costa:</a>Need to plug in for a couple of hours? Here\'s the mix: \'NERO - Essential Mix (First broadcast Nov 2010)\' - <a href="http://t.co/9MwHZCya" title="http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first">soundcloud.com/nerouk/nero-es\u2026</a></p>')
+            self.assertEqual(html, u'<p><a href="https://twitter.com/jasoncosta/status/240192632003911681">Jason Costa: </a>Need to plug in for a couple of hours? Here\'s the mix: \'NERO - Essential Mix (First broadcast Nov 2010)\' - <a href="http://t.co/9MwHZCya" title="http://soundcloud.com/nerouk/nero-essential-mix-first?utm_source=soundcloud&amp;utm_campaign=share&amp;utm_medium=twitter&amp;utm_content=http://soundcloud.com/nerouk/nero-essential-mix-first">soundcloud.com/nerouk/nero-es\u2026</a></p>')
 
     if os.path.exists(os.path.expanduser('~/.mdx_twitter.cfg')):
         def test_live_oembed(self):

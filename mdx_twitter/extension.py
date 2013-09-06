@@ -36,6 +36,8 @@ class TwitterLinkPattern(Pattern):
         result = None
         if self.ext.cache:
             result = self.ext.cache.get(get_cache_key(params))
+            if result:
+                result = json.loads(result)
         if not result:
             response = self.ext.client.get(
                 "https://api.twitter.com/1.1/statuses/oembed.json",

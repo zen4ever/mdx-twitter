@@ -5,7 +5,7 @@ import logging
 
 __author__ = 'Andrii Kurinnyi'
 __email__ = 'andrew@marpasoft.com'
-__version__ = '0.2.3'
+__version__ = '0.2.6'
 
 
 def makeExtension(configs=None):
@@ -33,7 +33,7 @@ def custom_style(result):
     tweet = soup.find('blockquote').find('p')
     link = soup.new_tag("a")
     link['href'] = result['url']
-    link.string = result['author_name'] + ':'
+    link.string = result['author_name'] + ': '
     tweet.insert(
         0, link
     )
