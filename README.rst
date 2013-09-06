@@ -91,6 +91,22 @@ problems. Just specify expected width of your tweet in pixels.
 
         md = markdown.Markdown(extensions=['twitter(width=300)'])
 
+It will only work with 'style' full.
+
+Styles
+------
+
+You can customize appearance of your tweets using 'style' configuration
+options. Default style is 'full', which includes script javascript, you could
+also use 'simple' style, which just includes tweet in a blockquote tag without
+javascript.
+
+Another option would be to specify a path to your own function, which accepts
+Twitter response json as an argument and should return final html.
+
+An example custom style is included in the library. You can use it by
+specifying 'style=mdx_twitter.custom_style'
+
 TODO
 ----
 

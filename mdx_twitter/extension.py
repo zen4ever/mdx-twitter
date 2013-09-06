@@ -1,3 +1,4 @@
+import json
 import logging
 
 from markdown import Extension
@@ -7,35 +8,56 @@ from requests_oauthlib import OAuth1Session
 TWITTER_LINK_RE = r"https?://twitter.com/([^/]+)/status(es)?/(?P<tweet_id>\d+)"
 
 
-def get_cache_key(tweet_id):
-    return u':'.join([u'mdx_twitter', unicode(tweet_id)])
+def get_cache_key(params):
+    return ":".join(
+        ['mdx_twitter'] + [item for sublist in params.items() for item in sublist]
+    )
+
+
+def process_tweet(result, tweet_style='full'):
+    html = result['html']
+    if tweet_style not in ['full', 'simple']:
+        module, function = tweet_style.rsplit('.', 1)
+        return getattr(__import__(module), function)(result)
+    return html
 
 
 class TwitterLinkPattern(Pattern):
 
     def get_html(self, tweet_id):
-        html = None
+        params = {
+            'id': tweet_id,
+        }
+        tweet_style = 'full'
+        if self.ext.config['style'][0]:
+            tweet_style = self.ext.config['style'][0]
+        if tweet_style != 'full':
+            params['omit_script'] = 'true'
+        result = None
         if self.ext.cache:
-            html = self.ext.cache.get(get_cache_key(tweet_id))
-        if not html:
+            result = self.ext.cache.get(get_cache_key(params))
+        if not result:
             response = self.ext.client.get(
                 "https://api.twitter.com/1.1/statuses/oembed.json",
-                params={
-                    'id': tweet_id,
-                })
+                params=params
+            )
             result = response.json()
             if 'html' in result:
-                html = result['html']
                 if self.ext.cache:
-                    self.ext.cache.set(get_cache_key(tweet_id), html, timeout=60*60*24)
+                    self.ext.cache.set(
+                        get_cache_key(params),
+                        json.dumps(result),
+                        timeout=60*60*24
+                    )
             else:
                 for err in result['errors']:
                     logging.warning(err['message'])
-        if html:
+        if result and 'html' in result:
+            html = process_tweet(result, tweet_style)
             # if we have width in a config,
             # we are probably use Markdow in a UIWebView
             # https://dev.twitter.com/discussions/15450
-            if self.ext.config['width'][0]:
+            if tweet_style == 'full' and self.ext.config['width'][0]:
                 # let's fix the URL protocol
                 html = html.replace(
                     '"//platform.twitter.com/',
@@ -60,6 +82,11 @@ class TwitterExtension(Extension):
         self.cache = kwargs.pop('cache')
         self.config = {
             'width': ['', 'Width of your tweet, useful for mobile'],
+            'style': [
+                '',
+                'Style of the tweet: '
+                'full, simple, or path to a function like "mdx_twitter.custom_style"'
+            ],
         }
         for key, value in configs:
             self.setConfig(key, value)

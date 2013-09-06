@@ -30,6 +30,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Markdown',
+        'beautifulsoup4',
         'requests-oauthlib>=0.3.3',
     ],
     tests_require=[

@@ -5,7 +5,7 @@ import logging
 
 __author__ = 'Andrii Kurinnyi'
 __email__ = 'andrew@marpasoft.com'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 
 def makeExtension(configs=None):
@@ -25,3 +25,16 @@ def makeExtension(configs=None):
         twitter_settings=get_twitter_settings(),
         cache=cache
     )
+
+
+def custom_style(result):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(result['html'])
+    tweet = soup.find('blockquote').find('p')
+    link = soup.new_tag("a")
+    link['href'] = result['url']
+    link.string = result['author_name'] + ':'
+    tweet.insert(
+        0, link
+    )
+    return unicode(tweet)
